@@ -9,6 +9,7 @@ with the following widgets:
 
 * GridFrame: a frame which makes it easier to order its contained widgets according to a grid layout
 * ScrollingFrame: a frame which makes it easier to bind scrollbars to its contained widget
+* ButtonFrame: a frame which generates horizontally ordered buttons
 
 You can use the framethrower.py library from your Python program by simply
 putting the file `framethrower.py` in the same directory with your
@@ -34,7 +35,9 @@ Here is how it is defined:
 
     class GridFrame(tk.Frame):
         ...
-        def put(self, table, rowweights=None, colweights=None):
+        def put(self, table,
+                rowweights=None, colweights=None,
+                minheights=None, minwidths=None):
             """Put the widgets specified within table in a tabular fashion.
 
             table is a sequence of sequence of tkinter widgets.
@@ -54,6 +57,18 @@ Here is how it is defined:
               2 means row/column will grow
                  twice as much compared to the ones with 1
               ...
+
+            Optionally, minheights and/or minwidths can be provided
+            as sequences of numbers.
+            For example, if minheights=[100, 200, 50] is given,
+            the minimum heights of the first, second and the third row
+            are set as 100, 200, and 50, respectively.
+            If minheights=[100, None, 50] is given,
+            then the minimum heights of the first and the third rows
+            are set as 100 and 50, respectively,
+            and a minimum height value for the second row is not set.
+            The argument minwidths is used similarly
+            to set minimum width values for the columns of the grid.
             """
 
 ## ScrollingFrame
@@ -77,6 +92,22 @@ For example, it could be a `tk.Text`:
 Finally, we say:
 
     myscroller.contain(mytext)
+
+## ButtonFrame
+
+Use this frame to quickly generate buttons in your window.
+Here is how it works:
+
+    class ButtonFrame(tk.Frame):
+        ...
+        def put(self, buttons):
+            """Create and put buttons with the specified
+            label texts and callback functions.
+            The buttons argument is a list of pairs expected as follows:
+            [(button1LabelString, button1CallbackFunction),
+             (button2LabelString, button2CallbackFunction),
+             ...
+             (buttonNLabelString, buttonNCallbackFunction)]"""
 
 ## An example
 

@@ -62,7 +62,9 @@ class GridFrame(tk.Frame):
     def __init__(self, *args, **opts):
         tk.Frame.__init__(self, *args, **opts)
 
-    def put(self, table, rowweights=None, colweights=None):
+    def put(self, table,
+            rowweights=None, colweights=None,
+            minheights=None, minwidths=None):
         """Put the widgets specified within table in a tabular fashion.
 
         table is a sequence of sequence of tkinter widgets.
@@ -82,6 +84,18 @@ class GridFrame(tk.Frame):
           2 means row/column will grow
              twice as much compared to the ones with 1
           ...
+
+        Optionally, minheights and/or minwidths can be provided
+        as sequences of numbers.
+        For example, if minheights=[100, 200, 50] is given,
+        the minimum heights of the first, second and the third row
+        are set as 100, 200, and 50, respectively.
+        If minheights=[100, None, 50] is given,
+        then the minimum heights of the first and the third rows
+        are set as 100 and 50, respectively,
+        and a minimum height value for the second row is not set.
+        The argument minwidths is used similarly
+        to set minimum width values for the columns of the grid.
         """
         rowindex = 0
         colindex = 0
@@ -107,6 +121,20 @@ class GridFrame(tk.Frame):
             j = 0
             for weight in colweights:
                 self.grid_columnconfigure(j, weight=weight)
+                j += 1
+
+        if not (minheights is None):
+            i = 0
+            for height in minheights:
+                if not (height is None):
+                    self.grid_rowconfigure(i, minsize=height)
+                i += 1
+
+        if not (minwidths is None):
+            j = 0
+            for width in minwidths:
+                if not (width is None):
+                    self.grid_columnconfigure(j, minsize=width)
                 j += 1
 
 class ScrollingFrame(tk.Frame):
@@ -167,11 +195,43 @@ class ScrollingFrame(tk.Frame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
+class ButtonFrame(tk.Frame):
+    """A Frame which is used to contain horizontally ordered command buttons"""
+
+    def __init__(self, **opts):
+        """Initialize the ButtonFrame.
+        All initialization options are directly passed to the
+        initialization procedure of the tkinter.Frame class"""
+
+        tk.Frame.__init__(self, **opts)
+
+    def put(self, buttons):
+        """Create and put buttons with the specified
+        label texts and callback functions.
+        The buttons argument is a list of pairs expected as follows:
+        [(button1LabelString, button1CallbackFunction),
+         (button2LabelString, button2CallbackFunction),
+         ...
+         (buttonNLabelString, buttonNCallbackFunction)]"""
+
+        for (text, command) in buttons:
+            tk.Button(master=self, text=text, command=command).pack(
+                side=tk.LEFT)
+
+default_stickies.append((ButtonFrame, ""))
+
 def test1():
     class MyMainWindow:
+        def dummy(self):
+            pass
+
         def __init__(self):
             self.root = tk.Tk()
             self.table = GridFrame(master=self.root)
+
+            self.commands = ButtonFrame(master=self.table)
+            self.commands.put([("New", self.dummy),
+                               ("Open", self.dummy)])
 
             self.entry1 = tk.Entry(master=self.table)
 
@@ -182,13 +242,16 @@ def test1():
             self.button1 = tk.Button(master=self.table, text="Test")
 
             self.table.put(
-                [["Here is an Entry:"        , self.entry1],
+                [[None                       , self.commands],
+                 ["Here is an Entry:"        , self.entry1],
                  ["Here is a scrolled Text:" , self.textscroller],
                  [None                       , self.button1]],
-                rowweights=[0, 1, 0],
-                colweights=[0, 1])
+                rowweights=[0, 0, 1, 0],
+                colweights=[0, 1],
+                minwidths=[None, 200])
 
             self.table.place(x=0, y=0, relwidth=1, relheight=1)
+            self.root.geometry("640x480")
 
         def show(self):
             self.root.mainloop()
