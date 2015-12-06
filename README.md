@@ -15,12 +15,16 @@ You can use the framethrower.py library from your Python program by simply
 putting the file `framethrower.py` in the same directory with your
 Python code file, and then by using the following import line:
 
-    import framethrower as ft
+```python
+import framethrower as ft
+```
 
 You can also use `tkinter` itself with the help of framethrower.py if you wish:
 
-    import framethrower as ft
-    tk = ft.tk
+```python
+import framethrower as ft
+tk = ft.tk
+```
 
 I have tested the framethrower.py library with Python 2.7, Python 3.4, and PyPy 4.
 
@@ -33,43 +37,45 @@ named `put`.
 
 Here is how it is defined:
 
-    class GridFrame(tk.Frame):
-        ...
-        def put(self, table,
-                rowweights=None, colweights=None,
-                minheights=None, minwidths=None):
-            """Put the widgets specified within table in a tabular fashion.
+```python
+class GridFrame(tk.Frame):
+    ...
+    def put(self, table,
+            rowweights=None, colweights=None,
+            minheights=None, minwidths=None):
+        """Put the widgets specified within table in a tabular fashion.
 
-            table is a sequence of sequence of tkinter widgets.
-            For example, it can be a list of list of widgets like this:
-                [ [widget1, widget2],     # row1
-                  [widget3, widget4] ]    # row2
-            If, instead of a widget, a string is given,
-            then a tkinter Label is automatically created and placed
-            in that cell. If, instead of a widget, None is given,
-            that cell is left empty.
+        table is a sequence of sequence of tkinter widgets.
+        For example, it can be a list of list of widgets like this:
+            [ [widget1, widget2],     # row1
+              [widget3, widget4] ]    # row2
+        If, instead of a widget, a string is given,
+        then a tkinter Label is automatically created and placed
+        in that cell. If, instead of a widget, None is given,
+        that cell is left empty.
 
-            rowweights and colweights are sequences of numbers.
-            Each number specify how much a widget in a row/column should
-            grow vertically/horizontally when the GridFrame itself grows.
-              0 means row/column should not grow
-              1 means row/column will grow
-              2 means row/column will grow
-                 twice as much compared to the ones with 1
-              ...
+        rowweights and colweights are sequences of numbers.
+        Each number specify how much a widget in a row/column should
+        grow vertically/horizontally when the GridFrame itself grows.
+          0 means row/column should not grow
+          1 means row/column will grow
+          2 means row/column will grow
+             twice as much compared to the ones with 1
+          ...
 
-            Optionally, minheights and/or minwidths can be provided
-            as sequences of numbers.
-            For example, if minheights=[100, 200, 50] is given,
-            the minimum heights of the first, second and the third row
-            are set as 100, 200, and 50, respectively.
-            If minheights=[100, None, 50] is given,
-            then the minimum heights of the first and the third rows
-            are set as 100 and 50, respectively,
-            and a minimum height value for the second row is not set.
-            The argument minwidths is used similarly
-            to set minimum width values for the columns of the grid.
-            """
+        Optionally, minheights and/or minwidths can be provided
+        as sequences of numbers.
+        For example, if minheights=[100, 200, 50] is given,
+        the minimum heights of the first, second and the third row
+        are set as 100, 200, and 50, respectively.
+        If minheights=[100, None, 50] is given,
+        then the minimum heights of the first and the third rows
+        are set as 100 and 50, respectively,
+        and a minimum height value for the second row is not set.
+        The argument minwidths is used similarly
+        to set minimum width values for the columns of the grid.
+        """
+```
 
 ## ScrollingFrame
 
@@ -77,73 +83,83 @@ To bind scrollbar(s) to a widget,
 you can place that widget within a `ScrollingFrame`.
 First, the `ft.ScrollingFrame` instance is initialized:
 
-    myscroller = ft.ScrollingFrame(master=mywindow, orient=tk.VERTICAL)
-    # orient=tk.VERTICAL means we want a vertical scrollbar attached
-    # we could say orient=tk.HORIZONTAL if we wanted a horizontal scrollbar
-    # or orient=tk.BOTH if we wanted both types of scrollbars
-    # if orient is not specified, it defaults to tk.BOTH
+```python
+myscroller = ft.ScrollingFrame(master=mywindow, orient=tk.VERTICAL)
+# orient=tk.VERTICAL means we want a vertical scrollbar attached
+# we could say orient=tk.HORIZONTAL if we wanted a horizontal scrollbar
+# or orient=tk.BOTH if we wanted both types of scrollbars
+# if orient is not specified, it defaults to tk.BOTH
+```
 
 Then, we initialize the widget for which we want attached scrollbars,
 with the `ft.ScrollingFrame` as its master.
 For example, it could be a `tk.Text`:
 
-    mytext = tk.Text(master=myscroller, ...)
+```python
+mytext = tk.Text(master=myscroller, ...)
+```
 
 Finally, we say:
 
-    myscroller.contain(mytext)
+```python
+myscroller.contain(mytext)
+```
 
 ## ButtonFrame
 
 Use this frame to quickly generate buttons in your window.
 Here is how it works:
 
-    class ButtonFrame(tk.Frame):
-        ...
-        def put(self, buttons):
-            """Create and put buttons with the specified
-            label texts and callback functions.
-            The buttons argument is a list of pairs expected as follows:
-            [(button1LabelString, button1CallbackFunction),
-             (button2LabelString, button2CallbackFunction),
-             ...
-             (buttonNLabelString, buttonNCallbackFunction)]"""
+```python
+class ButtonFrame(tk.Frame):
+    ...
+    def put(self, buttons):
+        """Create and put buttons with the specified
+        label texts and callback functions.
+        The buttons argument is a list of pairs expected as follows:
+        [(button1LabelString, button1CallbackFunction),
+         (button2LabelString, button2CallbackFunction),
+         ...
+         (buttonNLabelString, buttonNCallbackFunction)]"""
+```
 
 ## An example
 
 Here is an example Python code which demonstrates the usage of the
 `framethrower.py` library:
 
-    import framethrower as ft
-    tk = ft.tk
+```python
+import framethrower as ft
+tk = ft.tk
 
-    class MyMainWindow:
-        def __init__(self):
-            self.root = tk.Tk()
-            self.table = ft.GridFrame(master=self.root)
+class MyMainWindow:
+    def __init__(self):
+        self.root = tk.Tk()
+        self.table = ft.GridFrame(master=self.root)
 
-            self.entry1 = tk.Entry(master=self.table)
+        self.entry1 = tk.Entry(master=self.table)
 
-            self.textscroller = ft.ScrollingFrame(master=self.table)
-            self.text1 = tk.Text(master=self.textscroller)
-            self.textscroller.contain(self.text1)
+        self.textscroller = ft.ScrollingFrame(master=self.table)
+        self.text1 = tk.Text(master=self.textscroller)
+        self.textscroller.contain(self.text1)
 
-            self.button1 = tk.Button(master=self.table, text="Test")
+        self.button1 = tk.Button(master=self.table, text="Test")
 
-            self.table.put(
-                [["Here is an Entry:"        , self.entry1],
-                 ["Here is a scrolled Text:" , self.textscroller],
-                 [None                       , self.button1]],
-                rowweights=[0, 1, 0],
-                colweights=[0, 1])
+        self.table.put(
+            [["Here is an Entry:"        , self.entry1],
+             ["Here is a scrolled Text:" , self.textscroller],
+             [None                       , self.button1]],
+            rowweights=[0, 1, 0],
+            colweights=[0, 1])
 
-            self.table.place(x=0, y=0, relwidth=1, relheight=1)
+        self.table.place(x=0, y=0, relwidth=1, relheight=1)
 
-        def show(self):
-            self.root.mainloop()
+    def show(self):
+        self.root.mainloop()
 
-    mywin = MyMainWindow()
-    mywin.show()
+mywin = MyMainWindow()
+mywin.show()
+```
 
 ## License
 
