@@ -87,7 +87,7 @@ Then, we initialize the widget for which we want attached scrollbars,
 with the `ft.ScrollingFrame` as its master.
 For example, it could be a `tk.Text`:
 
-    mytext = ft.Text(master=myscroller, ...)
+    mytext = tk.Text(master=myscroller, ...)
 
 Finally, we say:
 
