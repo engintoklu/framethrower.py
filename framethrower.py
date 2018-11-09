@@ -1,5 +1,5 @@
 # This is the framethrower.py library
-# Nihat Engin Toklu < http://github.com/engintoklu >, 2015
+# Nihat Engin Toklu < http://github.com/engintoklu >, 2018
 
 #################
 # This is free and unencumbered software released into the public domain.
@@ -33,15 +33,26 @@ try:
 except ImportError:
     import tkinter as tk
 
+
 def is_string_data(x):
     return type(x) in [type(""), type(u"")]
 
+
+def make_sure_widget(x, master):
+    if is_string_data(x):
+        return tk.Label(text=x, master=master)
+    else:
+        return x
+
+
 BY_ORIENT = "BY_ORIENT"
+
 
 default_stickies = [
     (tk.Label, tk.W + tk.N),
     (tk.Button, ""),
     (tk.Scrollbar, BY_ORIENT)]
+
 
 def get_default_sticky(widget):
     global default_stickies
@@ -56,86 +67,129 @@ def get_default_sticky(widget):
                 return sticky
     return tk.N + tk.S + tk.W + tk.E
 
+
+class GridCell(object):
+    """A GridCell represents a cell within a GridFrame.
+    A GridCell instance can be used instead of a regular widget
+    with the put() method of a GridFrame,
+    so that the behavior of that GridFrame cell is configured.
+    See also the __init__() method's documentation.
+    """
+
+    def __init__(self,
+                 widget,
+                 grow_vertically=False,
+                 grow_horizontally=False,
+                 min_width=None,
+                 min_height=None,
+                 sticky=None):
+        """Initialize the GridCell instance.
+
+        Arguments:
+
+        widget
+            Expected as a tkinter widget or an str.
+            If given as an str, it is assumed that the cell
+            will contain a tkinter Label widget with the specified
+            text.
+            Otherwise, if given as a tkinter widget,
+            the cell contains the specified widget.
+
+        grow_vertically
+            Expected as bool.
+            If set as True, the cell grows vertically
+            with the GridFrame.
+
+        grow_horizontally
+            Expected as bool.
+            If set as True, the cell grows horizontally
+            with the GridFrame.
+
+        min_width
+            Expected as None, or as an int.
+            An integer given here specifies the minimum allowed
+            width of the cell.
+
+        min_height
+            Expected as None, or as an int.
+            An integer given here specifies the minimum allowed
+            height of the cell.
+
+        sticky
+            Expected as None, or an str.
+            The string should be a combination of the following characters:
+            'n' for north, 's' for south, 'e' for east, 'w' for west.
+            Specifies in which directions the widget will be stretched
+            as the size of the cell changes.
+        """
+        self.widget = widget
+        self.grow_vertically = grow_vertically
+        self.grow_horizontally = grow_horizontally
+        self.min_width = min_width
+        self.min_height = min_height
+        self.sticky = sticky
+
+    def _put_into_grid(self, grid, rowindex, colindex):
+        widget = make_sure_widget(self.widget, grid)
+        if self.sticky is not None:
+            sticky = self.sticky
+        else:
+            sticky = get_default_sticky(widget)
+        widget.grid(row=rowindex, column=colindex, sticky=sticky)
+        if self.grow_vertically:
+            grid.grid_rowconfigure(rowindex, weight=1)
+        if self.grow_horizontally:
+            grid.grid_columnconfigure(colindex, weight=1)
+        if self.min_height is not None:
+            grid.grid_rowconfigure(rowindex, minsize=self.min_height)
+        if self.min_width is not None:
+            grid.grid_columnconfigure(colindex, minsize=self.min_width)
+
+
 class GridFrame(tk.Frame):
     """GridFrame is a class which extends Frame of tkinter.
     It is designed to quickly place widgets in a tabular fashion."""
     def __init__(self, *args, **opts):
         tk.Frame.__init__(self, *args, **opts)
 
-    def put(self, table,
-            rowweights=None, colweights=None,
-            minheights=None, minwidths=None):
+    def put(self, *table):
         """Put the widgets specified within table in a tabular fashion.
 
-        table is a sequence of sequence of tkinter widgets.
-        For example, it can be a list of list of widgets like this:
-            [ [widget1, widget2],     # row1
-              [widget3, widget4] ]    # row2
-        If, instead of a widget, a string is given,
-        then a tkinter Label is automatically created and placed
-        in that cell. If, instead of a widget, None is given,
-        that cell is left empty.
+        table is a sequence of sequence of tkinter widgets,
+        to be passed as an argument list.
+        For example, the put method of a GridFrame gf can be called like this:
 
-        rowweights and colweights are sequences of numbers.
-        Each number specify how much a widget in a row/column should
-        grow vertically/horizontally when the GridFrame itself grows.
-          0 means row/column should not grow
-          1 means row/column will grow
-          2 means row/column will grow
-             twice as much compared to the ones with 1
-          ...
+        gf.put(
+            [widget1, widget2],     # row1
+            [widget3, widget4]      # row2
+        )
 
-        Optionally, minheights and/or minwidths can be provided
-        as sequences of numbers.
-        For example, if minheights=[100, 200, 50] is given,
-        the minimum heights of the first, second and the third row
-        are set as 100, 200, and 50, respectively.
-        If minheights=[100, None, 50] is given,
-        then the minimum heights of the first and the third rows
-        are set as 100 and 50, respectively,
-        and a minimum height value for the second row is not set.
-        The argument minwidths is used similarly
-        to set minimum width values for the columns of the grid.
+        Instead of a widget:
+        - If a string is given,
+          then a tkinter Label is automatically created and placed
+          in that cell.
+        - If None is given, that cell is left empty.
+        - If a GridCell instance is given, the widget contained by
+          that GridCell instance is placed into the grid,
+          and the cell is configured according to the attributes
+          specified by that GridCell instance.
         """
         rowindex = 0
         colindex = 0
         for row in table:
             colindex = 0
             for widget in row:
-                if not (widget is None):
-                    if is_string_data(widget):
-                        widget = tk.Label(text=widget, master=self)
-                    widget.grid(row=rowindex,
-                                column=colindex,
-                                sticky=get_default_sticky(widget))
+                if widget is not None:
+                    if isinstance(widget, GridCell):
+                        widget._put_into_grid(self, rowindex, colindex)
+                    else:
+                        widget = make_sure_widget(widget, self)
+                        widget.grid(row=rowindex,
+                                    column=colindex,
+                                    sticky=get_default_sticky(widget))
                 colindex += 1
             rowindex += 1
 
-        if not (rowweights is None):
-            i = 0
-            for weight in rowweights:
-                self.grid_rowconfigure(i, weight=weight)
-                i += 1
-
-        if not (colweights is None):
-            j = 0
-            for weight in colweights:
-                self.grid_columnconfigure(j, weight=weight)
-                j += 1
-
-        if not (minheights is None):
-            i = 0
-            for height in minheights:
-                if not (height is None):
-                    self.grid_rowconfigure(i, minsize=height)
-                i += 1
-
-        if not (minwidths is None):
-            j = 0
-            for width in minwidths:
-                if not (width is None):
-                    self.grid_columnconfigure(j, minsize=width)
-                j += 1
 
 class ScrollingFrame(tk.Frame):
     """A Frame which automatically attaches scrollbars to the widget contained"""
@@ -195,6 +249,7 @@ class ScrollingFrame(tk.Frame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
+
 class ButtonFrame(tk.Frame):
     """A Frame which is used to contain horizontally ordered command buttons"""
 
@@ -205,33 +260,51 @@ class ButtonFrame(tk.Frame):
 
         tk.Frame.__init__(self, **opts)
 
-    def put(self, buttons):
+    def put(self, *buttons):
         """Create and put buttons with the specified
         label texts and callback functions.
-        The buttons argument is a list of pairs expected as follows:
-        [(button1LabelString, button1CallbackFunction),
-         (button2LabelString, button2CallbackFunction),
-         ...
-         (buttonNLabelString, buttonNCallbackFunction)]"""
+        buttons is a list of pairs, to be given as an argument list.
+
+        For example, the put() method of a ButtonFrame bf can be called
+        like this:
+        bf.put(
+            (button1LabelString, button1CallbackFunction),
+            (button2LabelString, button2CallbackFunction),
+            ...
+            (buttonNLabelString, buttonNCallbackFunction),
+        )
+        """
 
         for (text, command) in buttons:
             tk.Button(master=self, text=text, command=command).pack(
                 side=tk.LEFT)
 
+
 default_stickies.append((ButtonFrame, ""))
 
-def test1():
-    class MyMainWindow:
-        def dummy(self):
-            pass
+
+def demo1():
+    try:
+        import tkMessageBox as tkmsg
+    except ImportError:
+        import tkinter.messagebox as tkmsg
+
+    class MyMainWindow(object):
+        def new_click(self):
+            tkmsg.showinfo("Info", "Clicked on 'New'")
+
+        def open_click(self):
+            tkmsg.showinfo("Info", "Clicked on 'Open'")
 
         def __init__(self):
             self.root = tk.Tk()
             self.table = GridFrame(master=self.root)
 
             self.commands = ButtonFrame(master=self.table)
-            self.commands.put([("New", self.dummy),
-                               ("Open", self.dummy)])
+            self.commands.put(
+                ("New", self.new_click),
+                ("Open", self.open_click)
+            )
 
             self.entry1 = tk.Entry(master=self.table)
 
@@ -242,13 +315,30 @@ def test1():
             self.button1 = tk.Button(master=self.table, text="Test")
 
             self.table.put(
-                [[None                       , self.commands],
-                 ["Here is an Entry:"        , self.entry1],
-                 ["Here is a scrolled Text:" , self.textscroller],
-                 [None                       , self.button1]],
-                rowweights=[0, 0, 1, 0],
-                colweights=[0, 1],
-                minwidths=[None, 200])
+                [
+                    None,
+                    self.commands
+                ],
+                [
+                    "Here is an Entry:",
+                    GridCell(
+                        self.entry1,
+                        grow_horizontally=True,
+                        min_width=200
+                    )
+                ],
+                [
+                    "Here is a scrolled Text:" ,
+                    GridCell(
+                        self.textscroller,
+                        grow_vertically=True
+                    )
+                ],
+                [
+                    None,
+                    self.button1
+                ]
+            )
 
             self.table.place(x=0, y=0, relwidth=1, relheight=1)
             self.root.geometry("640x480")
@@ -260,4 +350,4 @@ def test1():
     mywin.show()
 
 if __name__ == "__main__":
-    test1()
+    demo1()
