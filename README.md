@@ -11,13 +11,13 @@ with the following widgets:
 * ScrollingFrame: a frame which makes it easier to bind scrollbars to its contained widget
 * ButtonFrame: a frame which generates horizontally ordered buttons
 
-You can use the framethrower.py library by simply
-putting the file `framethrower.py` into the same directory with your
-Python project, and then by using the following import line:
+You can use the framethrower.py library by simply putting the file `framethrower.py` into the same directory with your Python project, and then by using the following import line:
 
 ```python
 import framethrower as ft
 ```
+
+The code was tested and was observed to be working with Python 2.7 and Python 3.6.
 
 ## Documentation
 

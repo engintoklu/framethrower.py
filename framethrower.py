@@ -331,6 +331,7 @@ def demo1():
                     "Here is a scrolled Text:" ,
                     GridCell(
                         self.textscroller,
+                        grow_horizontally=True,
                         grow_vertically=True
                     )
                 ],
